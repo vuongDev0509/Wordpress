@@ -1,39 +1,81 @@
 (function($){
     $(document).ready(function(){
-        $('.bt-btn-cate-product').click(function(e){
-            e.preventDefault();
-            var cate_id = $(this).data("id");
-            console.log(cate_id);
+        // js filter checkbox
+        $('.bt-btn-filter').click(function(eg){
+            var checkbox = document.getElementsByName('cate-product');
             var term = [ ];
-            term.push(cate_id);
-             console.log(term)
+            for (var i = 0; i < checkbox.length; i++){
+                if (checkbox[i].checked === true){
+                    var cate_id = $(checkbox[i]).data("id");
+                term.push(cate_id);
+                }
+            }
             $.ajax({
-                type : "post", //Phương thức truyền post hoặc get
-                dataType : "json", //Dạng dữ liệu trả về xml, json, script, or html
-                url :custom_ajax_params.ajaxurl,  //Đường dẫn chứa hàm xử lý dữ liệu. Mặc định của WP như vậy
+                type : "post",
+                dataType : "json",
+                url :custom_ajax_params.ajaxurl,
                 data : {
-                    action: "loadpostt", //Tên action
-                    id_cate: cate_id,
+                    action: "loadproductck",
+                    term_id: term,
                 },
                 context: this,
                 beforeSend: function(){
-                    //Làm gì đó trước khi gửi dữ liệu vào xử lý
+
                 },
                 success: function(response) {
-                    //Làm gì đó khi dữ liệu đã được xử lý
+                    // Do something when the data has been processed
                     if(response.success) {
                         $('#bt-id-product').html(response.data);
                     }
                     else {
-                        alert('Đã có lỗi xảy ra');
+                        alert('An error has occurred');
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
-                    //Làm gì đó khi có lỗi xảy ra
+                // Do something when an error occurs
+                console.log( 'The following error occured: ' + textStatus, errorThrown );
+                }
+            })
+        });
+
+        // js filter radio
+        var loading_ui = $("<div class='bt-loading_ui'><img src='http://beplusprojects.com/wpvuong/wp-content/uploads/2020/05/Spinner-1s-200px.gif' /> </div>")
+        $('html body').prepend(loading_ui);
+        $('.bt-btn-cate-product').click(function(e){
+            var cate_id = $(this).data("id");
+            $(this).addClass("loading");
+            setTimeout( function() {
+                 $('.bt-btn-cate-product').removeClass("loading");
+            }, 500);
+            $.ajax({
+                type : "post",
+                dataType : "json",
+                url :custom_ajax_params.ajaxurl,
+                data : {
+                    action: "loadproduct",
+                    id_cate: cate_id,
+                },
+                context: this,
+                beforeSend: function(){
+                    loading_ui.addClass("active")
+                    setTimeout( function() {
+                         loading_ui.removeClass("active");
+                    }, 1000);
+                },
+                success: function(response) {
+                    // Do something when the data has been processed
+                    if(response.success) {
+                        $('#bt-id-product').html(response.data);
+                    }
+                    else {
+                        alert('An error has occurred');
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    // Do something when an error occurs
                     console.log( 'The following error occured: ' + textStatus, errorThrown );
                 }
             })
-            return false;
         })
     })
 })(jQuery)
